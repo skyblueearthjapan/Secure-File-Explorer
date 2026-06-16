@@ -1,0 +1,65 @@
+using Microsoft.AspNetCore.Authentication.Negotiate;
+using Microsoft.EntityFrameworkCore;
+using SecureFileExplorer.Server.Data;
+using SecureFileExplorer.Server.Security;
+using SecureFileExplorer.Server.Services;
+
+var builder = WebApplication.CreateBuilder(args);
+
+// ---- 設定バインド ----
+builder.Services.Configure<CatalogOptions>(builder.Configuration.GetSection("Catalog"));
+var ipOptions = builder.Configuration.GetSection("IpRestriction").Get<IpRestrictionOptions>()
+    ?? new IpRestrictionOptions();
+
+// ---- DB (SQLite / EF Core) ----
+var conn = builder.Configuration.GetConnectionString("Catalog")
+    ?? "Data Source=catalog.db";
+builder.Services.AddDbContext<AppDbContext>(opt => opt.UseSqlite(conn));
+
+// ---- 認証: Windows統合認証 (Negotiate/Kerberos/NTLM) ----
+builder.Services.AddAuthentication(NegotiateDefaults.AuthenticationScheme)
+    .AddNegotiate();
+builder.Services.AddAuthorization(options =>
+{
+    // 既定で全エンドポイントに認証を要求する。
+    options.FallbackPolicy = options.DefaultPolicy;
+});
+
+// ---- アプリサービス ----
+builder.Services.AddScoped<ICatalogService, CatalogService>();
+builder.Services.AddScoped<IFolderScanner, FolderScanner>();
+builder.Services.AddScoped<IAccessLogger, AccessLogger>();
+
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+var app = builder.Build();
+
+// ---- DB初期化（MVP: マイグレーション未使用なので EnsureCreated）----
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    db.Database.EnsureCreated();
+}
+
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
+app.UseHttpsRedirection();
+
+// ---- 社内ネットワーク以外を遮断（認証より前に弾く）----
+app.UseIpRestriction(ipOptions);
+
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.MapControllers();
+
+app.Run();
+
+// テストプロジェクトから参照できるよう公開する。
+public partial class Program { }

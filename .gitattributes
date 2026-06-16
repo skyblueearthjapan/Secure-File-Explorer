@@ -1,0 +1,16 @@
+# 既定はテキストとして自動正規化
+* text=auto
+
+# C#/設定系はLFで保存（チェックアウト時にCRLFへ）
+*.cs        text diff=csharp
+*.csproj    text
+*.sln       text eol=crlf
+*.xaml      text
+*.json      text
+*.md        text
+
+# バイナリ
+*.png binary
+*.jpg binary
+*.pfx binary
+*.snk binary
