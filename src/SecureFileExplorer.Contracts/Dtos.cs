@@ -53,3 +53,29 @@ public sealed record FileSearchHitDto
     public FileDto File { get; init; } = new();
     public IReadOnlyList<BreadcrumbDto> Location { get; init; } = Array.Empty<BreadcrumbDto>();
 }
+
+/// <summary>現在の認証ユーザー情報。</summary>
+public sealed record WhoAmIDto
+{
+    public string User { get; init; } = string.Empty;
+    public bool Authenticated { get; init; }
+}
+
+/// <summary>アクセスログ1件（閲覧用）。実パスは含まない。</summary>
+public sealed record AccessLogDto
+{
+    public long Id { get; init; }
+    public DateTimeOffset TimestampUtc { get; init; }
+    public string UserName { get; init; } = string.Empty;
+    public string? MachineName { get; init; }
+    public string? IpAddress { get; init; }
+
+    /// <summary>操作種別の表示名（一覧表示 / ファイルオープン / 検索 / エラー）。</summary>
+    public string Action { get; init; } = string.Empty;
+
+    public long? FileId { get; init; }
+    public long? FolderId { get; init; }
+    public string? Target { get; init; }
+    public bool Success { get; init; }
+    public string? FailureReason { get; init; }
+}

@@ -91,20 +91,30 @@ public sealed class FolderScanner : IFolderScanner
                 var ext = Path.GetExtension(file);
                 if (excludeExt.Contains(ext)) continue;
 
-                FileInfo info;
-                try { info = new FileInfo(file); }
-                catch (Exception ex) { errors.Add($"ファイル読取失敗: {Path.GetFileName(file)} ({ex.Message})"); continue; }
-
-                _db.Files.Add(new FileEntity
+                // メタデータ取得(Length/LastWriteTimeUtc)は、OneDrive等のクラウド・プレースホルダや
+                // 壊れたエントリで例外を投げることがある。1ファイル分をまとめて保護し、
+                // 問題のあるファイルだけスキップして同フォルダーの残りを取りこぼさないようにする。
+                try
                 {
-                    FolderId = parent.Id,
-                    Name = info.Name,
-                    Extension = ext,
-                    FullPath = info.FullName,
-                    SizeBytes = info.Length,
-                    ModifiedUtc = info.LastWriteTimeUtc,
-                });
-                onFile();
+                    var info = new FileInfo(file);
+                    var size = info.Length;
+                    var modified = info.LastWriteTimeUtc;
+
+                    _db.Files.Add(new FileEntity
+                    {
+                        FolderId = parent.Id,
+                        Name = info.Name,
+                        Extension = ext,
+                        FullPath = info.FullName,
+                        SizeBytes = size,
+                        ModifiedUtc = modified,
+                    });
+                    onFile();
+                }
+                catch (Exception ex)
+                {
+                    errors.Add($"ファイル読取失敗: {Path.GetFileName(file)} ({ex.Message})");
+                }
             }
         }
         catch (UnauthorizedAccessException) { errors.Add($"アクセス拒否(ファイル): {parent.Name}"); }

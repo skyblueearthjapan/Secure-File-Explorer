@@ -21,7 +21,7 @@ public partial class App : Application
         _api = new ApiClient(config);
         var vm = new MainViewModel(_api, temp);
 
-        var window = new MainWindow(vm);
+        var window = new MainWindow(vm, _api);
         window.Show();
     }
 

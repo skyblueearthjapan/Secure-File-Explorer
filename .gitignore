@@ -53,3 +53,6 @@ appsettings.*.Local.json
 
 # ---- OMC working state ----
 .omc/
+
+# Design handoff artifacts (binary)
+*.zip

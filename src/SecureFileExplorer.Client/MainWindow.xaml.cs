@@ -1,6 +1,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using SecureFileExplorer.Client.Services;
 using SecureFileExplorer.Client.ViewModels;
 
 namespace SecureFileExplorer.Client;
@@ -10,6 +11,8 @@ namespace SecureFileExplorer.Client;
 /// </summary>
 public partial class MainWindow : Window
 {
+    private readonly ApiClient? _api;
+
     private MainViewModel? Vm => DataContext as MainViewModel;
 
     public MainWindow()
@@ -17,8 +20,9 @@ public partial class MainWindow : Window
         InitializeComponent();
     }
 
-    public MainWindow(MainViewModel vm) : this()
+    public MainWindow(MainViewModel vm, ApiClient api) : this()
     {
+        _api = api;
         DataContext = vm;
         Loaded += async (_, _) => await vm.InitializeAsync();
     }
@@ -30,14 +34,22 @@ public partial class MainWindow : Window
             Vm.SelectedFolder = folder;
     }
 
-    /// <summary>ダブルクリックで選択中の1ファイルを開く。</summary>
+    /// <summary>ダブルクリック: フォルダーなら中へ移動、ファイルなら開く。</summary>
     private async void FileList_MouseDoubleClick(object sender, MouseButtonEventArgs e)
     {
         // 列ヘッダーや空白部分のダブルクリックを除外
         if (e.OriginalSource is DependencyObject src && ItemsControl.ContainerFromElement(FileList, src) is ListViewItem)
         {
-            if (Vm is not null) await Vm.OpenSelectedFileAsync();
+            if (Vm is not null) await Vm.OpenSelectedEntryAsync();
         }
+    }
+
+    /// <summary>[ログ] ボタン: アクセスログ閲覧ウィンドウを開く。</summary>
+    private void OpenLog_Click(object sender, RoutedEventArgs e)
+    {
+        if (_api is null) return;
+        var win = new LogWindow(_api) { Owner = this };
+        win.Show();
     }
 
     /// <summary>

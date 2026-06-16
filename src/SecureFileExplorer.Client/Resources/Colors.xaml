@@ -1,0 +1,51 @@
+<!-- 配色トークン（design_handoff_file_type_coloring / 案A 準拠）。色はここで一元管理する。 -->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- アクセント（青）: 左ヘッダー・選択・列見出し文字 -->
+    <Color x:Key="AccentColor">#FF005FB8</Color>
+    <SolidColorBrush x:Key="AccentBrush"      Color="{StaticResource AccentColor}"/>
+    <SolidColorBrush x:Key="ColumnHeaderBg"   Color="#FFEAF1FA"/>
+    <SolidColorBrush x:Key="ColumnHeaderText" Color="#FF1F4F86"/>
+    <SolidColorBrush x:Key="ColumnHeaderLine" Color="#FFD8E3F1"/>
+    <SolidColorBrush x:Key="SelectionBg"      Color="#FFEAF3FC"/>
+    <SolidColorBrush x:Key="HoverBg"          Color="#FFF3F6FA"/>
+    <SolidColorBrush x:Key="ZebraBg"          Color="#FFFAFAFA"/>
+    <SolidColorBrush x:Key="MetaText"         Color="#FF5D5D5D"/>
+    <SolidColorBrush x:Key="InkText"          Color="#FF1C1C1C"/>
+
+    <!-- 画面パーツ色 -->
+    <SolidColorBrush x:Key="TitleBarBg"       Color="#FFF4F4F6"/>
+    <SolidColorBrush x:Key="TitleBarLine"     Color="#FFEAEAEE"/>
+    <SolidColorBrush x:Key="ToolbarLine"      Color="#FFF0F0F2"/>
+    <SolidColorBrush x:Key="CrumbBg"          Color="#FFFAFAFB"/>
+    <SolidColorBrush x:Key="CrumbLine"        Color="#FFEEF0F2"/>
+    <SolidColorBrush x:Key="CrumbText"        Color="#FF5A5B5F"/>
+    <SolidColorBrush x:Key="CrumbSep"         Color="#FFB8B9BD"/>
+    <SolidColorBrush x:Key="CrumbCurrent"     Color="#FF1B1C1F"/>
+    <SolidColorBrush x:Key="PaneLine"         Color="#FFECECEF"/>
+    <SolidColorBrush x:Key="ControlBorder"    Color="#FFD3D3D8"/>
+    <SolidColorBrush x:Key="ButtonBg"         Color="#FFFBFBFB"/>
+    <SolidColorBrush x:Key="StatusBg"         Color="#FFF4F4F6"/>
+    <SolidColorBrush x:Key="TreeBg"           Color="#FFFFFFFF"/>
+
+    <!-- 種別色（前景：アイコン・種類列） -->
+    <SolidColorBrush x:Key="Type.Folder"  Color="#FFC0840A"/> <!-- 山吹 -->
+    <SolidColorBrush x:Key="Type.Excel"   Color="#FF107C41"/> <!-- 緑 -->
+    <SolidColorBrush x:Key="Type.Word"    Color="#FF2B579A"/> <!-- 青 -->
+    <SolidColorBrush x:Key="Type.Pdf"     Color="#FFC42B6B"/> <!-- ピンク -->
+    <SolidColorBrush x:Key="Type.Ppt"     Color="#FFC5392B"/> <!-- 赤 -->
+    <SolidColorBrush x:Key="Type.Image"   Color="#FF7A33B5"/> <!-- 紫 -->
+    <SolidColorBrush x:Key="Type.Zip"     Color="#FF8A5A2B"/> <!-- 茶 -->
+    <SolidColorBrush x:Key="Type.Other"   Color="#FF6B6B6B"/>
+    <SolidColorBrush x:Key="Type.Default" Color="#FF6B6B6B"/>
+
+    <!-- 種別の淡色（将来の案C用・選択行背景） -->
+    <SolidColorBrush x:Key="Tint.Folder" Color="#FFFBF3E0"/>
+    <SolidColorBrush x:Key="Tint.Excel"  Color="#FFE8F4ED"/>
+    <SolidColorBrush x:Key="Tint.Word"   Color="#FFE9EFF7"/>
+    <SolidColorBrush x:Key="Tint.Pdf"    Color="#FFFBEAF1"/>
+    <SolidColorBrush x:Key="Tint.Ppt"    Color="#FFFAEBE7"/>
+    <SolidColorBrush x:Key="Tint.Image"  Color="#FFF2EAFA"/>
+    <SolidColorBrush x:Key="Tint.Zip"    Color="#FFF3EDE6"/>
+</ResourceDictionary>

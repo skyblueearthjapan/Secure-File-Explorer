@@ -43,6 +43,13 @@ public sealed class ApiClient : IDisposable
                $"api/search?q={Uri.EscapeDataString(query)}", ct)
            ?? Array.Empty<FileSearchHitDto>();
 
+    public async Task<WhoAmIDto?> WhoAmIAsync(CancellationToken ct = default)
+        => await _http.GetFromJsonAsync<WhoAmIDto>("api/admin/whoami", ct);
+
+    public async Task<IReadOnlyList<AccessLogDto>> GetLogsAsync(int take = 200, CancellationToken ct = default)
+        => await _http.GetFromJsonAsync<IReadOnlyList<AccessLogDto>>($"api/admin/logs?take={take}", ct)
+           ?? Array.Empty<AccessLogDto>();
+
     /// <summary>
     /// fileId のファイル内容を1件ストリーム取得し、指定のローカルパスへ書き出す。
     /// </summary>
