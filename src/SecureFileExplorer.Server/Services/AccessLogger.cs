@@ -7,7 +7,7 @@ public interface IAccessLogger
 {
     Task LogAsync(AccessAction action, bool success, HttpContext http,
         long? fileId = null, long? folderId = null, string? target = null, string? failureReason = null,
-        CancellationToken ct = default);
+        string? targetPath = null, CancellationToken ct = default);
 }
 
 /// <summary>
@@ -22,7 +22,7 @@ public sealed class AccessLogger : IAccessLogger
 
     public async Task LogAsync(AccessAction action, bool success, HttpContext http,
         long? fileId = null, long? folderId = null, string? target = null, string? failureReason = null,
-        CancellationToken ct = default)
+        string? targetPath = null, CancellationToken ct = default)
     {
         var user = http.User?.Identity?.Name ?? "(unknown)";
         var ip = http.Connection.RemoteIpAddress?.ToString();
@@ -42,6 +42,7 @@ public sealed class AccessLogger : IAccessLogger
             FileId = fileId,
             FolderId = folderId,
             Target = target,
+            TargetPath = targetPath,
             Success = success,
             FailureReason = failureReason,
         });

@@ -108,7 +108,11 @@ public sealed class AlertDetector
 
         var shown = logs.Take(Math.Max(1, _opt.MaxDetailRows)).ToList();
         foreach (var l in shown)
-            sb.AppendLine($"  {l.TimestampUtc.ToLocalTime():yyyy/MM/dd HH:mm:ss}  {l.Target}");
+        {
+            // 「いつ・どのフォルダ階層の・どのファイル」を1行で。場所(パス)が分かれば併記する。
+            var where = string.IsNullOrEmpty(l.TargetPath) ? l.Target : $"{l.TargetPath} › {l.Target}";
+            sb.AppendLine($"  {l.TimestampUtc.ToLocalTime():yyyy/MM/dd HH:mm:ss}  {where}");
+        }
         if (logs.Count > shown.Count)
             sb.AppendLine($"  … 他 {logs.Count - shown.Count} 件");
 

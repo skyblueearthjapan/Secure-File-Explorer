@@ -43,6 +43,7 @@ public sealed class AlertDetectorTests : IDisposable
                 IpAddress = "192.168.1.50",
                 Action = AccessAction.OpenFile,
                 Target = $"file_{i}.xlsx",
+                TargetPath = "技術部データ › 機械設計 › A社案件",
                 Success = true,
             });
         db.SaveChanges();
@@ -81,6 +82,7 @@ public sealed class AlertDetectorTests : IDisposable
             Assert.Contains("file_", mail.Body);   // 開いたファイルの明細が載っている
             Assert.Contains(".xlsx", mail.Body);
             Assert.Contains("PC-01", mail.Body);
+            Assert.Contains("機械設計", mail.Body); // フォルダ階層(パス)が併記される
         }
     }
 

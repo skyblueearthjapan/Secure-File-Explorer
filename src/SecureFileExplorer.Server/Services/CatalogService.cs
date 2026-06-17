@@ -14,6 +14,9 @@ public interface ICatalogService
 
     /// <summary>ファイルの実パスを取得する（サーバー内部専用・機密境界）。許可ルート配下のみ返す。</summary>
     Task<(string fullPath, string name)?> ResolveFilePathAsync(long fileId, CancellationToken ct = default);
+
+    /// <summary>ファイルの論理パス（パンくず・表示名の階層）を返す。実パスではない。例: 技術部データ › 機械設計 › A社案件</summary>
+    Task<string?> GetFileLogicalPathAsync(long fileId, CancellationToken ct = default);
 }
 
 /// <summary>
@@ -235,6 +238,18 @@ public sealed class CatalogService : ICatalogService
         if (!IsUnderConfiguredRoot(f.FullPath)) return null;
 
         return (f.FullPath, f.Name);
+    }
+
+    public async Task<string?> GetFileLogicalPathAsync(long fileId, CancellationToken ct = default)
+    {
+        var node = await _db.Nodes
+            .Where(n => n.Id == fileId && !n.IsFolder)
+            .Select(n => new { n.ParentId })
+            .FirstOrDefaultAsync(ct);
+        if (node?.ParentId is not long parentId) return null;
+
+        var crumbs = await BuildBreadcrumbsAsync(parentId, ct);
+        return string.Join(" › ", crumbs.Select(c => c.Name));
     }
 
     private bool IsUnderConfiguredRoot(string fullPath)

@@ -85,6 +85,9 @@ public class AccessLogEntity
     /// <summary>対象名やクエリ文字列など（実パスは保存しない）。</summary>
     public string? Target { get; set; }
 
+    /// <summary>論理パス（パンくず・表示名の階層。例: 技術部データ › 機械設計 › A社案件）。実パスではない。</summary>
+    public string? TargetPath { get; set; }
+
     public bool Success { get; set; }
     public string? FailureReason { get; set; }
 }

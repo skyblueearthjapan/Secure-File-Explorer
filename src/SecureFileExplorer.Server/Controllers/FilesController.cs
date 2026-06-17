@@ -51,7 +51,10 @@ public sealed class FilesController : ControllerBase
         if (!new FileExtensionContentTypeProvider().TryGetContentType(name, out var contentType))
             contentType = "application/octet-stream";
 
-        await _logger.LogAsync(AccessAction.OpenFile, true, HttpContext, fileId: id, target: name, ct: ct);
+        // 論理パス（パンくず・表示名の階層）も記録する。実パスではない。
+        var logicalPath = await _catalog.GetFileLogicalPathAsync(id, ct);
+        await _logger.LogAsync(AccessAction.OpenFile, true, HttpContext, fileId: id, target: name,
+            targetPath: logicalPath, ct: ct);
 
         var stream = new FileStream(fullPath, FileMode.Open, FileAccess.Read, FileShare.Read,
             bufferSize: 1 << 16, useAsync: true);

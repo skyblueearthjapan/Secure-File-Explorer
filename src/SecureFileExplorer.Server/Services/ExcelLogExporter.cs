@@ -12,7 +12,7 @@ namespace SecureFileExplorer.Server.Services;
 /// </summary>
 public sealed class ExcelLogExporter : BackgroundService
 {
-    private static readonly string[] Header = { "日時", "操作", "対象", "成否", "失敗理由", "PC名", "IP" };
+    private static readonly string[] Header = { "日時", "操作", "場所(パス)", "対象", "成否", "失敗理由", "PC名", "IP" };
 
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly ExcelLogOptions _opt;
@@ -93,11 +93,12 @@ public sealed class ExcelLogExporter : BackgroundService
             var next = (ws.LastRowUsed()?.RowNumber() ?? 1) + 1;
             ws.Cell(next, 1).Value = l.TimestampUtc.ToLocalTime().ToString("yyyy/MM/dd HH:mm:ss");
             ws.Cell(next, 2).Value = ActionLabel(l.Action);
-            ws.Cell(next, 3).Value = l.Target ?? string.Empty;
-            ws.Cell(next, 4).Value = l.Success ? "○" : "×";
-            ws.Cell(next, 5).Value = l.FailureReason ?? string.Empty;
-            ws.Cell(next, 6).Value = l.MachineName ?? string.Empty;
-            ws.Cell(next, 7).Value = l.IpAddress ?? string.Empty;
+            ws.Cell(next, 3).Value = l.TargetPath ?? string.Empty;
+            ws.Cell(next, 4).Value = l.Target ?? string.Empty;
+            ws.Cell(next, 5).Value = l.Success ? "○" : "×";
+            ws.Cell(next, 6).Value = l.FailureReason ?? string.Empty;
+            ws.Cell(next, 7).Value = l.MachineName ?? string.Empty;
+            ws.Cell(next, 8).Value = l.IpAddress ?? string.Empty;
             lastId = l.Id;
         }
 
