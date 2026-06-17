@@ -86,6 +86,7 @@ public sealed class SmtpMailSender : BackgroundService
 
                 m.Status = MailStatus.Sent;
                 m.SentUtc = DateTimeOffset.UtcNow;
+                _log.LogWarning("警告メールを送信しました id={Id} 宛先={To} 件名={Subject}", m.Id, m.ToCsv, m.Subject);
             }
             catch (Exception ex)
             {

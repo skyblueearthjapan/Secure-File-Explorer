@@ -19,6 +19,18 @@ public sealed class MailController : ControllerBase
 
     public MailController(AppDbContext db) => _db = db;
 
+    /// <summary>アウトボックスの状態別件数（送信確認用）。</summary>
+    [HttpGet("status")]
+    public async Task<ActionResult<object>> Status(CancellationToken ct)
+    {
+        return Ok(new
+        {
+            pending = await _db.MailOutbox.CountAsync(m => m.Status == MailStatus.Pending, ct),
+            sent = await _db.MailOutbox.CountAsync(m => m.Status == MailStatus.Sent, ct),
+            failed = await _db.MailOutbox.CountAsync(m => m.Status == MailStatus.Failed, ct),
+        });
+    }
+
     /// <summary>送信待ちメールを取得する。</summary>
     [HttpGet("pending")]
     public async Task<ActionResult<IReadOnlyList<MailMessageDto>>> Pending([FromQuery] int take = 20, CancellationToken ct = default)
