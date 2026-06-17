@@ -31,7 +31,7 @@
   },
   "ExcelLog": {
     "Enabled": true,
-    "FilePath": "D:\\SecureFileExplorerLogs\\access-log.xlsx",
+    "FilePath": "D:\\MTlock関連\\system\\アクセスログ\\access-log.xlsx",
     "FlushIntervalSeconds": 60
   },
   "Alert": {
