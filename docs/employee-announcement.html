@@ -48,26 +48,36 @@
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
         <td width="40" valign="top"><div style="width:30px; height:30px; border-radius:50%; background:#005FB8; color:#fff; font-weight:700; text-align:center; line-height:30px;">2</div></td>
         <td valign="top" style="font-size:15px; line-height:1.8;">
-          初回起動時、<strong>セキュリティの確認画面が順番に1〜3回ほど表示される場合があります</strong>
-          （特に、このメールのリンクから開いた場合）。いずれも <strong>社内の正規アプリ</strong>のための確認です。
-          表示されたら、各画面で <strong>［開く］／［はい］／［許可］／［続行］</strong> のいずれかを選んで進めてください。
+          メールのリンクから開くと、下の <strong>3つの確認画面が順番に表示されます</strong>。
+          いずれも <strong>社内の正規アプリ</strong>のための確認ですので、表示された順に
+          <strong>下記のボタンを押して進めてください</strong>。
 
-          <!-- 警告ダイアログの見本 -->
-          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:12px 0; border:1px solid #c9cdd3; border-radius:6px; background:#fbfbfb;">
-            <tr><td style="background:#eef0f3; padding:8px 12px; font-size:13px; color:#333; border-bottom:1px solid #dfe2e6;">開いているファイル - セキュリティの警告</td></tr>
-            <tr><td style="padding:14px 14px 6px; font-size:13.5px; line-height:1.7; color:#333;">
-              このファイルを開きますか？<br>
-              <span style="color:#666;">発行元: 不明な発行元</span>
-            </td></tr>
-            <tr><td style="padding:8px 14px 14px;" align="right">
-              <span style="display:inline-block; border:1px solid #999; border-radius:4px; padding:5px 18px; font-size:13px; background:#e8f0fe; color:#1a1a1a; font-weight:600;">開く</span>
-              <span style="display:inline-block; border:1px solid #bbb; border-radius:4px; padding:5px 14px; font-size:13px; background:#f4f4f4; color:#555; margin-left:6px;">キャンセル</span>
+          <!-- 警告1 -->
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:12px 0 0; border:1px solid #d9c6c6; border-radius:6px;">
+            <tr><td style="background:#fbeaea; padding:8px 12px; font-size:13px; color:#8a3b3b; border-bottom:1px solid #eed6d6; font-weight:700;">① Microsoft Outlook のセキュリティに関する通知</td></tr>
+            <tr><td style="padding:10px 14px; font-size:13.5px; line-height:1.7; color:#333;">
+              「セキュリティに影響を及ぼす…問題点が検知されました」と出ますが、社内アプリのため問題ありません。
+              <div style="margin-top:8px;"><span style="display:inline-block; border:1px solid #2c7; border-radius:4px; padding:5px 18px; font-size:13px; background:#e6f7ec; color:#16632e; font-weight:700;">→ はい(Y) を押す</span></div>
             </td></tr>
           </table>
-          <div style="background:#eef6ff; border:1px solid #cfe2f7; border-radius:6px; padding:10px 14px; font-size:13.5px; line-height:1.75; color:#1a3d63;">
-            メールから開くと確認が複数回出ます。<strong>「メールのリンクを開きますか？」→「開いているファイル - セキュリティの警告」</strong>などが順に出ますが、
-            <strong>すべて［開く／はい／許可］で進めてOK</strong>です。<br>
-            ※「発行元: 不明な発行元」と表示されますが、社内ネットワーク上の正規アプリのため問題ありません。
+          <!-- 警告2 -->
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:10px 0 0; border:1px solid #c9cdd3; border-radius:6px;">
+            <tr><td style="background:#eef0f3; padding:8px 12px; font-size:13px; color:#333; border-bottom:1px solid #dfe2e6; font-weight:700;">② 添付ファイルを開いています</td></tr>
+            <tr><td style="padding:10px 14px; font-size:13.5px; line-height:1.7; color:#333;">
+              「ファイルの処理方法」が表示されます。
+              <div style="margin-top:8px;"><span style="display:inline-block; border:1px solid #2c7; border-radius:4px; padding:5px 18px; font-size:13px; background:#e6f7ec; color:#16632e; font-weight:700;">→ 開く(O) を押す</span></div>
+            </td></tr>
+          </table>
+          <!-- 警告3 -->
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:10px 0 0; border:1px solid #c9cdd3; border-radius:6px;">
+            <tr><td style="background:#eef0f3; padding:8px 12px; font-size:13px; color:#333; border-bottom:1px solid #dfe2e6; font-weight:700;">③ 開いているファイル - セキュリティの警告</td></tr>
+            <tr><td style="padding:10px 14px; font-size:13.5px; line-height:1.7; color:#333;">
+              「発行元: 不明な発行元」と出ますが、社内ネットワーク上の正規アプリのため問題ありません。
+              <div style="margin-top:8px;"><span style="display:inline-block; border:1px solid #2c7; border-radius:4px; padding:5px 18px; font-size:13px; background:#e6f7ec; color:#16632e; font-weight:700;">→ 開く(O) を押す</span></div>
+            </td></tr>
+          </table>
+          <div style="background:#eef6ff; border:1px solid #cfe2f7; border-radius:6px; padding:10px 14px; margin-top:12px; font-size:13.5px; line-height:1.75; color:#1a3d63;">
+            この3つの確認は <strong>初回など限られた場面でのみ</strong>表示されます。次の手順で <strong>タスクバーにピン留め</strong>すれば、以降は表示されません。
           </div>
         </td>
       </tr></table>
