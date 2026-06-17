@@ -61,6 +61,15 @@ public sealed record WhoAmIDto
     public bool Authenticated { get; init; }
 }
 
+/// <summary>送信待ちメール1件（Outlook送信エージェント用）。</summary>
+public sealed record MailMessageDto
+{
+    public long Id { get; init; }
+    public string To { get; init; } = string.Empty;
+    public string Subject { get; init; } = string.Empty;
+    public string Body { get; init; } = string.Empty;
+}
+
 /// <summary>アクセスログ1件（閲覧用）。実パスは含まない。</summary>
 public sealed record AccessLogDto
 {

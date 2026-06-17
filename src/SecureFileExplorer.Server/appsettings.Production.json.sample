@@ -33,5 +33,13 @@
     "Enabled": true,
     "FilePath": "D:\\SecureFileExplorerLogs\\access-log.xlsx",
     "FlushIntervalSeconds": 60
+  },
+  "Alert": {
+    "Enabled": true,
+    "WindowMinutes": 10,
+    "MaxOpensInWindow": 30,
+    "CooldownMinutes": 60,
+    "CheckIntervalSeconds": 60,
+    "Recipients": [ "soumu@example.local", "admin@example.local" ]
   }
 }

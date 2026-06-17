@@ -38,6 +38,10 @@ builder.Services.AddScoped<IAccessLogger, AccessLogger>();
 builder.Services.Configure<ExcelLogOptions>(builder.Configuration.GetSection("ExcelLog"));
 builder.Services.AddHostedService<ExcelLogExporter>();
 
+// ---- 大量アクセス検知 → 警告メールをアウトボックスへ ----
+builder.Services.Configure<AlertOptions>(builder.Configuration.GetSection("Alert"));
+builder.Services.AddHostedService<AccessAlertMonitor>();
+
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
