@@ -57,6 +57,9 @@ public class MailMessageEntity
     /// <summary>関連ユーザー（同一ユーザーへの連続通知抑制＝クールダウン判定に使う）。</summary>
     public string? RelatedUser { get; set; }
 
+    /// <summary>警告レベルの強さ（1=注意, 2=警告, 3=異常警告…）。エスカレーション判定に使う。</summary>
+    public int AlertLevel { get; set; }
+
     public MailStatus Status { get; set; } = MailStatus.Pending;
     public DateTimeOffset? SentUtc { get; set; }
     public int Attempts { get; set; }

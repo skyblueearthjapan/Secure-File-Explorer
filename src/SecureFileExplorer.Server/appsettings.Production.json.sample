@@ -40,10 +40,20 @@
   },
   "Alert": {
     "Enabled": true,
-    "WindowMinutes": 10,
-    "MaxOpensInWindow": 30,
-    "CooldownMinutes": 60,
+    "WindowMinutes": 30,
+    "CooldownMinutes": 30,
     "CheckIntervalSeconds": 60,
-    "Recipients": [ "soumu@example.local", "admin@example.local" ]
+    "MaxDetailRows": 50,
+    "Recipients": [
+      "imaizumi@lineworks.co.jp",
+      "tsujino@lineworks.co.jp",
+      "c-matusita@lineworks.co.jp",
+      "t-ichida@lineworks.co.jp"
+    ],
+    "Levels": [
+      { "Name": "注意",     "Threshold": 10 },
+      { "Name": "警告",     "Threshold": 30 },
+      { "Name": "異常警告", "Threshold": 50 }
+    ]
   }
 }
