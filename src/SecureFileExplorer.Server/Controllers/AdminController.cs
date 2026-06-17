@@ -12,21 +12,25 @@ namespace SecureFileExplorer.Server.Controllers;
 [Route("api/admin")]
 public sealed class AdminController : ControllerBase
 {
-    private readonly IFolderScanner _scanner;
+    private readonly ICatalogService _catalog;
     private readonly AppDbContext _db;
 
-    public AdminController(IFolderScanner scanner, AppDbContext db)
+    public AdminController(ICatalogService catalog, AppDbContext db)
     {
-        _scanner = scanner;
+        _catalog = catalog;
         _db = db;
     }
 
-    /// <summary>ルートフォルダーを再スキャンしてカタログを更新する。</summary>
-    [HttpPost("scan")]
-    public async Task<ActionResult<ScanResult>> Scan(CancellationToken ct)
+    /// <summary>
+    /// ルート登録を確認する（オンデマンド方式のため事前スキャンは不要）。
+    /// 現在キャッシュ済み（訪問済み）のノード数を返す。
+    /// </summary>
+    [HttpPost("refresh-roots")]
+    public async Task<ActionResult<object>> RefreshRoots(CancellationToken ct)
     {
-        var result = await _scanner.ScanAllAsync(ct);
-        return Ok(result);
+        await _catalog.EnsureRootsAsync(ct);
+        var known = await _db.Nodes.CountAsync(ct);
+        return Ok(new { knownNodes = known, mode = "on-demand" });
     }
 
     /// <summary>現在のユーザー情報（疎通・認証確認用）。</summary>

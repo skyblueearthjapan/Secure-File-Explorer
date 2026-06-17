@@ -1,40 +1,24 @@
 namespace SecureFileExplorer.Server.Data;
 
 /// <summary>
-/// フォルダーのカタログ行。実パス(FullPath)はサーバー内部のみで保持し、
-/// クライアントへは決して返さない。
+/// path↔id の対応を保持するカタログノード（フォルダー/ファイル兼用）。
+/// オンデマンド方式では、ユーザーが訪問したフォルダーの子だけが遅延登録される。
+/// 実パス(FullPath)はサーバー内部のみで保持し、クライアントへは決して返さない。
 /// </summary>
-public class FolderEntity
+public class CatalogNode
 {
     public long Id { get; set; }
     public long? ParentId { get; set; }
-    public FolderEntity? Parent { get; set; }
-    public ICollection<FolderEntity> Children { get; set; } = new List<FolderEntity>();
-    public ICollection<FileEntity> Files { get; set; } = new List<FileEntity>();
 
     public string Name { get; set; } = string.Empty;
 
     /// <summary>サーバー上の実フルパス。機密。クライアントへ露出禁止。</summary>
     public string FullPath { get; set; } = string.Empty;
 
-    public DateTimeOffset LastScannedUtc { get; set; }
-}
+    public bool IsFolder { get; set; }
 
-/// <summary>
-/// ファイルのカタログ行。実パス(FullPath)はサーバー内部のみ。
-/// </summary>
-public class FileEntity
-{
-    public long Id { get; set; }
-    public long FolderId { get; set; }
-    public FolderEntity? Folder { get; set; }
-
-    public string Name { get; set; } = string.Empty;
+    // ファイル用メタデータ（列挙時に更新する）。フォルダーでは既定値。
     public string Extension { get; set; } = string.Empty;
-
-    /// <summary>サーバー上の実フルパス。機密。クライアントへ露出禁止。</summary>
-    public string FullPath { get; set; } = string.Empty;
-
     public long SizeBytes { get; set; }
     public DateTimeOffset ModifiedUtc { get; set; }
 }

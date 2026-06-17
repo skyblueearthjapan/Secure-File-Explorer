@@ -28,9 +28,18 @@ Secure-File-Explorer.sln
 - サーバー: ASP.NET Core Web API, EF Core + SQLite, Windows統合認証(Negotiate), IP制限ミドルウェア
 - クライアント: WPF (MVVM)
 
+### カタログ方式（オンデマンド / ライブ）
+事前の全件スキャンは行わない。ユーザーが開いたフォルダーだけ、サーバーがその場で実ディレクトリを
+列挙し、`path↔id` の対応のみを **訪問した分だけDBへ遅延登録** する。これにより、数万〜十数万
+ファイル規模の巨大な共有でも初回から瞬時に表示できる（実測: フォルダー展開 0.04〜0.4秒）。
+
+- 横断検索は「これまでに訪問（列挙）したフォルダー」の範囲に限定される。共有全体の検索が必要な
+  場合は、将来バックグラウンド索引を追加する（ナビゲーション速度は維持）。
+
 ### セキュリティ境界
 実パス（`\\server\...`）は **サーバー側のDB(`FullPath`列)とサーバー処理内だけ** が保持する。
 クライアントへ返すDTOには `fileId` / `folderId` のみが含まれ、パスは一切含まれない（テストで型レベル保証）。
+ファイル取得時は、解決した実パスが **必ず設定ルート配下である** ことを再検証する（パストラバーサル防止）。
 
 ## サーバー設定（`src/SecureFileExplorer.Server/appsettings.json`）
 
@@ -69,11 +78,8 @@ dotnet build
 # テスト
 dotnet test
 
-# サーバー起動
+# サーバー起動（起動時にルートを登録。事前スキャンは不要）
 dotnet run --project src/SecureFileExplorer.Server
-
-# カタログ初回スキャン（サーバー起動後・認証ユーザーで）
-#   POST https://localhost:5001/api/admin/scan
 
 # クライアント起動
 dotnet run --project src/SecureFileExplorer.Client
@@ -86,8 +92,9 @@ dotnet run --project src/SecureFileExplorer.Client
 | GET  | `/api/folders/roots` | ルートフォルダー一覧 |
 | GET  | `/api/folders/{id}/contents` | フォルダーの中身（サブフォルダー・ファイル・パンくず） |
 | GET  | `/api/files/{id}/content` | ファイル1件をストリーム取得（実パスは返さない） |
-| GET  | `/api/search?q=...` | ファイル名で部分一致検索 |
-| POST | `/api/admin/scan` | ルートを再スキャンしてカタログ更新 |
+| GET  | `/api/search?q=...` | ファイル名で部分一致検索（訪問済み範囲） |
+| GET  | `/api/admin/logs?take=N` | アクセスログ取得（新しい順） |
+| POST | `/api/admin/refresh-roots` | ルート登録の確認（オンデマンドのため事前スキャン不要） |
 | GET  | `/api/admin/whoami` | 認証確認 |
 
 ## ログ
@@ -97,7 +104,7 @@ dotnet run --project src/SecureFileExplorer.Client
 
 ## 今後の予定（初期MVP対象外）
 
-AD/グループによる細粒度の権限制御、差分スキャン(FileSystemWatcher)、SQL Server移行、
+AD/グループによる細粒度の権限制御、共有全体の横断検索（バックグラウンド索引）、SQL Server移行、
 大量アクセス検知、Excel/PDF等のアプリ内プレビュー など。
 
 ## ライセンス

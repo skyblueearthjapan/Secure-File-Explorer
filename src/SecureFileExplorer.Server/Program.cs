@@ -27,7 +27,6 @@ builder.Services.AddAuthorization(options =>
 
 // ---- アプリサービス ----
 builder.Services.AddScoped<ICatalogService, CatalogService>();
-builder.Services.AddScoped<IFolderScanner, FolderScanner>();
 builder.Services.AddScoped<IAccessLogger, AccessLogger>();
 
 builder.Services.AddControllers();
@@ -36,11 +35,15 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// ---- DB初期化（MVP: マイグレーション未使用なので EnsureCreated）----
+// ---- DB初期化（MVP: マイグレーション未使用なので EnsureCreated）＋ ルート登録 ----
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     db.Database.EnsureCreated();
+
+    // オンデマンド方式: 事前スキャンせず、ルートノードだけ登録しておく。
+    var catalog = scope.ServiceProvider.GetRequiredService<ICatalogService>();
+    await catalog.EnsureRootsAsync();
 }
 
 if (app.Environment.IsDevelopment())

@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using SecureFileExplorer.Server.Data;
 using SecureFileExplorer.Server.Services;
@@ -7,7 +6,7 @@ using SecureFileExplorer.Server.Services;
 namespace SecureFileExplorer.Tests;
 
 /// <summary>
-/// 実フォルダーをスキャン → カタログ構築 → クエリ、までの一連を検証する。
+/// オンデマンド方式のカタログ検証: ルート登録 → ライブ列挙 → クエリ。
 /// 特に「クライアント向けDTOに実パスが含まれない」ことを確認する。
 /// </summary>
 public sealed class CatalogIntegrationTests : IDisposable
@@ -17,7 +16,6 @@ public sealed class CatalogIntegrationTests : IDisposable
 
     public CatalogIntegrationTests()
     {
-        // 一時的なサンプルフォルダー構成を作る
         _sampleRoot = Path.Combine(Path.GetTempPath(), "sfe_test_" + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(Path.Combine(_sampleRoot, "01_CaseMgmt", "CompanyA"));
         Directory.CreateDirectory(Path.Combine(_sampleRoot, "02_Drawings"));
@@ -38,53 +36,45 @@ public sealed class CatalogIntegrationTests : IDisposable
         return ctx;
     }
 
-    private CatalogOptions BuildOptions() => new()
+    private CatalogService NewCatalog(AppDbContext db)
     {
-        Roots = new() { new RootFolderConfig { DisplayName = "EngineeringData", Path = _sampleRoot } }
-    };
+        var opt = Options.Create(new CatalogOptions
+        {
+            Roots = new() { new RootFolderConfig { DisplayName = "EngineeringData", Path = _sampleRoot } }
+        });
+        return new CatalogService(db, opt);
+    }
 
     [Fact]
-    public async Task Scan_then_query_returns_tree_and_files_without_real_paths()
+    public async Task OnDemand_navigation_lists_live_contents_without_real_paths()
     {
-        // スキャン
-        using (var db = NewContext())
-        {
-            var scanner = new FolderScanner(db, Options.Create(BuildOptions()), NullLogger<FolderScanner>.Instance);
-            var result = await scanner.ScanAllAsync();
-            Assert.True(result.FilesIndexed >= 3);
-            Assert.True(result.FoldersIndexed >= 4); // root + 01 + CompanyA + 02
-        }
+        using var db = NewContext();
+        var catalog = NewCatalog(db);
 
-        // クエリ
-        using (var db = NewContext())
-        {
-            var catalog = new CatalogService(db);
+        // ルートはオンデマンドで登録される
+        var roots = await catalog.GetRootFoldersAsync();
+        var root = Assert.Single(roots);
+        Assert.Equal("EngineeringData", root.Name);
+        Assert.True(root.HasChildren);
 
-            var roots = await catalog.GetRootFoldersAsync();
-            var root = Assert.Single(roots);
-            Assert.Equal("EngineeringData", root.Name);
-            Assert.True(root.HasChildren);
+        // ルートをライブ列挙
+        var contents = await catalog.GetFolderContentsAsync(root.Id);
+        Assert.NotNull(contents);
+        Assert.Contains(contents!.Folders, f => f.Name == "01_CaseMgmt");
+        Assert.Contains(contents.Folders, f => f.Name == "02_Drawings");
+        Assert.Contains(contents.Files, f => f.Name == "readme.txt");
+        Assert.Equal("EngineeringData", contents.Breadcrumbs.First().Name);
 
-            var contents = await catalog.GetFolderContentsAsync(root.Id);
-            Assert.NotNull(contents);
-            Assert.Contains(contents!.Folders, f => f.Name == "01_CaseMgmt");
-            Assert.Contains(contents.Files, f => f.Name == "readme.txt");
-
-            // パンくずはルートから始まる
-            Assert.Equal("EngineeringData", contents.Breadcrumbs.First().Name);
-
-            // 実パス解決はサーバー内部でのみ可能（クライアントDTOには無い）
-            var file = contents.Files.First(f => f.Name == "readme.txt");
-            var resolved = await catalog.ResolveFilePathAsync(file.Id);
-            Assert.NotNull(resolved);
-            Assert.True(File.Exists(resolved!.Value.fullPath));
-        }
+        // 実パス解決はサーバー内部でのみ可能（DTOには無い）
+        var readme = contents.Files.First(f => f.Name == "readme.txt");
+        var resolved = await catalog.ResolveFilePathAsync(readme.Id);
+        Assert.NotNull(resolved);
+        Assert.True(File.Exists(resolved!.Value.fullPath));
     }
 
     [Fact]
     public void Client_dto_types_do_not_expose_any_path_property()
     {
-        // DTOに "Path" を含むプロパティが無いことを型レベルで保証する（実パス漏えい防止）。
         var dtoTypes = new[]
         {
             typeof(SecureFileExplorer.Contracts.FileDto),
@@ -105,22 +95,49 @@ public sealed class CatalogIntegrationTests : IDisposable
     }
 
     [Fact]
-    public async Task Search_finds_file_by_partial_name()
+    public async Task Search_finds_visited_files_only()
     {
-        using (var db = NewContext())
-        {
-            var scanner = new FolderScanner(db, Options.Create(BuildOptions()), NullLogger<FolderScanner>.Instance);
-            await scanner.ScanAllAsync();
-        }
+        using var db = NewContext();
+        var catalog = NewCatalog(db);
 
-        using (var db = NewContext())
+        var roots = await catalog.GetRootFoldersAsync();
+        var root = roots[0];
+
+        // 訪問前は索引に無いので検索ヒット0
+        var before = await catalog.SearchAsync("estimate", 50);
+        Assert.Empty(before);
+
+        // CompanyA まで辿って列挙（= 訪問）すると索引に載る
+        var rootContents = await catalog.GetFolderContentsAsync(root.Id);
+        var caseMgmt = rootContents!.Folders.First(f => f.Name == "01_CaseMgmt");
+        var caseContents = await catalog.GetFolderContentsAsync(caseMgmt.Id);
+        var companyA = caseContents!.Folders.First(f => f.Name == "CompanyA");
+        await catalog.GetFolderContentsAsync(companyA.Id);
+
+        var after = await catalog.SearchAsync("estimate", 50);
+        Assert.Contains(after, h => h.File.Name == "estimate.xlsx");
+        Assert.NotEmpty(after.First(h => h.File.Name == "estimate.xlsx").Location);
+    }
+
+    [Fact]
+    public async Task ResolveFilePath_rejects_ids_outside_configured_roots()
+    {
+        using var db = NewContext();
+        var catalog = NewCatalog(db);
+
+        // 設定ルート外を指す偽ノードを直接仕込む
+        var rogue = new CatalogNode
         {
-            var catalog = new CatalogService(db);
-            var hits = await catalog.SearchAsync("estimate", 50);
-            Assert.Contains(hits, h => h.File.Name == "estimate.xlsx");
-            // ヒットには階層（パンくず）も付く
-            Assert.NotEmpty(hits.First(h => h.File.Name == "estimate.xlsx").Location);
-        }
+            ParentId = null,
+            IsFolder = false,
+            Name = "secret.txt",
+            FullPath = Path.Combine(Path.GetTempPath(), "outside_root_secret.txt"),
+        };
+        db.Nodes.Add(rogue);
+        await db.SaveChangesAsync();
+
+        var resolved = await catalog.ResolveFilePathAsync(rogue.Id);
+        Assert.Null(resolved); // ルート配下でないため拒否される
     }
 
     public void Dispose()
