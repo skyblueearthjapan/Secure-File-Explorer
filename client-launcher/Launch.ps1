@@ -24,9 +24,13 @@ try {
 
   if (-not (Test-Path -LiteralPath $exe)) { throw "failed to fetch app: $exe" }
 
-  # cleanup older versions (skip any that are locked / in use)
+  # cleanup: keep the 5 most recent versions (and always the current one), so a
+  # taskbar-pinned exe keeps working across a few updates. Skip locked folders.
   if (Test-Path -LiteralPath $localBase) {
+    $keep = 5
     Get-ChildItem -LiteralPath $localBase -Directory -ErrorAction SilentlyContinue |
+      Sort-Object LastWriteTime -Descending |
+      Select-Object -Skip $keep |
       Where-Object { $_.Name -ne $version } |
       ForEach-Object { try { Remove-Item -LiteralPath $_.FullName -Recurse -Force } catch {} }
   }
