@@ -1,0 +1,37 @@
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "ConnectionStrings": {
+    "Catalog": "Data Source=D:\\Apps\\SecureFileExplorer\\catalog.db"
+  },
+  "Kestrel": {
+    "Endpoints": {
+      "Http": {
+        "Url": "http://0.0.0.0:5080"
+      }
+    }
+  },
+  "Catalog": {
+    "Roots": [
+      {
+        "DisplayName": "技術部データ",
+        "Path": "\\\\lineworks-sv\\Data\\技術部"
+      }
+    ],
+    "ExcludeFolderNames": [ ".git", ".vs", "bin", "obj", "node_modules", "$RECYCLE.BIN", "System Volume Information" ],
+    "ExcludeExtensions": [ ".tmp", ".lnk" ]
+  },
+  "IpRestriction": {
+    "Enabled": true,
+    "AllowedCidrs": [ "127.0.0.1/32", "::1/128", "192.168.1.0/24" ]
+  },
+  "ExcelLog": {
+    "Enabled": true,
+    "FilePath": "D:\\SecureFileExplorerLogs\\access-log.xlsx",
+    "FlushIntervalSeconds": 60
+  }
+}

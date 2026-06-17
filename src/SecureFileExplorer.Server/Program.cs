@@ -6,6 +6,11 @@ using SecureFileExplorer.Server.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// ---- Windows サービスとして動かせるようにする ----
+// コンソール実行（開発）でもサービス実行（本番MTSV）でも同じバイナリで動く。
+// サービス時はコンテンツルートが exe のフォルダーに設定される。
+builder.Host.UseWindowsService(o => o.ServiceName = "SecureFileExplorer");
+
 // ---- 設定バインド ----
 builder.Services.Configure<CatalogOptions>(builder.Configuration.GetSection("Catalog"));
 var ipOptions = builder.Configuration.GetSection("IpRestriction").Get<IpRestrictionOptions>()
@@ -28,6 +33,10 @@ builder.Services.AddAuthorization(options =>
 // ---- アプリサービス ----
 builder.Services.AddScoped<ICatalogService, CatalogService>();
 builder.Services.AddScoped<IAccessLogger, AccessLogger>();
+
+// ---- アクセスログのExcel出力（ユーザー別シート）----
+builder.Services.Configure<ExcelLogOptions>(builder.Configuration.GetSection("ExcelLog"));
+builder.Services.AddHostedService<ExcelLogExporter>();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
