@@ -14,6 +14,7 @@ x86/
 dist/
 build/
 out/
+publish/
 
 # ---- Databases (catalog/logs are generated at runtime) ----
 *.db
