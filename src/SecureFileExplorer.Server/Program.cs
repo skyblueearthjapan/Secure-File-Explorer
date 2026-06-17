@@ -42,6 +42,10 @@ builder.Services.AddHostedService<ExcelLogExporter>();
 builder.Services.Configure<AlertOptions>(builder.Configuration.GetSection("Alert"));
 builder.Services.AddHostedService<AccessAlertMonitor>();
 
+// ---- アウトボックスを Gmail/SMTP で直接送信（クライアント常駐エージェント不要）----
+builder.Services.Configure<SmtpOptions>(builder.Configuration.GetSection("Smtp"));
+builder.Services.AddHostedService<SmtpMailSender>();
+
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

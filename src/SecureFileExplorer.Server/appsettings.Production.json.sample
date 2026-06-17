@@ -38,6 +38,17 @@
     "FilePath": "D:\\MTlock関連\\system\\アクセスログ\\access-log.xlsx",
     "FlushIntervalSeconds": 60
   },
+  "Smtp": {
+    "Enabled": true,
+    "Host": "smtp.gmail.com",
+    "Port": 587,
+    "UseStartTls": true,
+    "User": "imaizumi@lineworks-local.info",
+    "Password": "<<GoogleアプリパスワードをMTSV上で設定（gitに入れない）>>",
+    "FromAddress": "imaizumi@lineworks-local.info",
+    "FromName": "Secure File Explorer 監視",
+    "PollSeconds": 30
+  },
   "Alert": {
     "Enabled": true,
     "WindowMinutes": 30,
