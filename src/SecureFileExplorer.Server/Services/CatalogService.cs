@@ -42,25 +42,63 @@ public sealed class CatalogService : ICatalogService
 
     public async Task EnsureRootsAsync(CancellationToken ct = default)
     {
+        var configuredPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
         foreach (var root in _opt.Roots)
         {
             if (string.IsNullOrWhiteSpace(root.Path)) continue;
             var fullPath = Path.GetFullPath(root.Path);
-            var exists = await _db.Nodes.AnyAsync(n => n.ParentId == null && n.FullPath == fullPath, ct);
-            if (!exists)
+            configuredPaths.Add(fullPath);
+
+            var existing = await _db.Nodes.FirstOrDefaultAsync(n => n.ParentId == null && n.FullPath == fullPath, ct);
+            var displayName = string.IsNullOrWhiteSpace(root.DisplayName)
+                ? new DirectoryInfo(fullPath).Name
+                : root.DisplayName;
+
+            if (existing is null)
             {
                 _db.Nodes.Add(new CatalogNode
                 {
                     ParentId = null,
                     IsFolder = true,
-                    Name = string.IsNullOrWhiteSpace(root.DisplayName)
-                        ? new DirectoryInfo(fullPath).Name
-                        : root.DisplayName,
+                    Name = displayName,
                     FullPath = fullPath,
                 });
             }
+            else if (existing.Name != displayName)
+            {
+                existing.Name = displayName; // 表示名の変更を反映
+            }
         }
+
+        // 設定から外れたルート（とそのキャッシュ済み子孫）を削除し、設定を正にする。
+        var staleRoots = await _db.Nodes
+            .Where(n => n.ParentId == null)
+            .Select(n => new { n.Id, n.FullPath })
+            .ToListAsync(ct);
+        foreach (var sr in staleRoots)
+        {
+            if (!configuredPaths.Contains(sr.FullPath))
+                await DeleteSubtreeAsync(sr.Id, ct);
+        }
+
         await _db.SaveChangesAsync(ct);
+    }
+
+    /// <summary>指定ノードとその子孫を全削除する（自己参照FKのカスケードに頼らず明示的に）。</summary>
+    private async Task DeleteSubtreeAsync(long rootId, CancellationToken ct)
+    {
+        var ids = new List<long>();
+        var queue = new Queue<long>();
+        queue.Enqueue(rootId);
+        while (queue.Count > 0)
+        {
+            var id = queue.Dequeue();
+            ids.Add(id);
+            var children = await _db.Nodes.Where(n => n.ParentId == id).Select(n => n.Id).ToListAsync(ct);
+            foreach (var c in children) queue.Enqueue(c);
+        }
+        await _db.Nodes.Where(n => ids.Contains(n.Id)).ExecuteDeleteAsync(ct);
     }
 
     public async Task<IReadOnlyList<FolderDto>> GetRootFoldersAsync(CancellationToken ct = default)

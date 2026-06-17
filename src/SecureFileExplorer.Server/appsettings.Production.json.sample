@@ -20,6 +20,10 @@
       {
         "DisplayName": "技術部データ",
         "Path": "\\\\lineworks-sv\\Data\\技術部"
+      },
+      {
+        "DisplayName": "電気設計",
+        "Path": "D:\\MTlock関連\\技術部\\電気設計"
       }
     ],
     "ExcludeFolderNames": [ ".git", ".vs", "bin", "obj", "node_modules", "$RECYCLE.BIN", "System Volume Information" ],

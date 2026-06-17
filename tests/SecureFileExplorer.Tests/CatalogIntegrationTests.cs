@@ -140,6 +140,38 @@ public sealed class CatalogIntegrationTests : IDisposable
         Assert.Null(resolved); // ルート配下でないため拒否される
     }
 
+    [Fact]
+    public async Task EnsureRoots_removes_roots_no_longer_configured()
+    {
+        // 1) sampleRoot をルートに登録し、ナビゲートして子ノードも作る
+        using (var db = NewContext())
+        {
+            var cat = NewCatalog(db);
+            var roots = await cat.GetRootFoldersAsync();
+            await cat.GetFolderContentsAsync(roots[0].Id); // 子ノードを生成
+            Assert.True(await db.Nodes.CountAsync() > 1);
+        }
+
+        // 2) 別のルートだけを設定 → 旧ルートとその子孫が消えること
+        var otherRoot = Path.Combine(Path.GetTempPath(), "sfe_other_" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(otherRoot);
+        try
+        {
+            using var db = NewContext();
+            var opt = Options.Create(new CatalogOptions
+            {
+                Roots = new() { new RootFolderConfig { DisplayName = "Other", Path = otherRoot } }
+            });
+            var cat = new CatalogService(db, opt);
+            await cat.EnsureRootsAsync();
+
+            var roots = await cat.GetRootFoldersAsync();
+            Assert.Equal("Other", Assert.Single(roots).Name);
+            Assert.False(await db.Nodes.AnyAsync(n => n.FullPath == Path.GetFullPath(_sampleRoot)));
+        }
+        finally { try { Directory.Delete(otherRoot, true); } catch { } }
+    }
+
     public void Dispose()
     {
         try { if (Directory.Exists(_sampleRoot)) Directory.Delete(_sampleRoot, true); } catch { }
